@@ -1,10 +1,16 @@
-AWS_ACCOUNT_ID=aws sts get-caller-identity --query "Account" --output text
+AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 GITHUB_REPO_NAME=$(basename $(dirname $(pwd)))
-GITHUB_REPO="$GIT_HUB_USER_NAME/$GITHUB_REPO_NAME"
+GITHUB_REPO="$GIT_HUB_USER_NAME/$GITHUB_REPO_NAME" # use in terminal => export GIT_HUB_USER_NAME="<Your-GIT-User"
 GITHUB_ACTION_ROLE_NAME=GitHubActionsRole-$GITHUB_REPO_NAME
 GITHUB_ACTION_POLICY_NAME=GitHubActionsPolicy-$GITHUB_REPO_NAME
 
+echo "AWS Account $AWS_ACCOUNT_ID"
 echo "Repository $GITHUB_REPO"
+echo "AWS Role $GITHUB_ACTION_ROLE_NAME"
+
+EXISTS=$(aws iam list-open-id-connect-providers | grep -c "token.actions.githubusercontent.com")
+
+if [ "$EXISTS" -eq 0 ]; then
 
 echo "Creating the thumbprint for github"
 
@@ -16,7 +22,13 @@ echo "Create the OIDC Provider"
 aws iam create-open-id-connect-provider \
   --url https://token.actions.githubusercontent.com \
   --client-id-list sts.amazonaws.com \
-  --thumbprint-list  $THUMBPRINT
+  --thumbprint-list $THUMBPRINT
+
+fi
+
+ROLE_EXISTS=$(aws iam get-role --role-name "$ROLE_NAME" 2>&1)
+
+if [[ "$ROLE_EXISTS" == *"NoSuchEntity"* ]]; then
 
 echo "Creating the Trust Policy for the Github Repository $2 to deploy into the AWS account ID $1"
 
@@ -29,6 +41,8 @@ aws iam create-role \
     --assume-role-policy-document file://trust-policy-temp.json \
     --no-cli-pager \
     --output json
+
+fi
 
 echo "Putting the policy into the role"
 
