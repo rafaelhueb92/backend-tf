@@ -1,9 +1,9 @@
 resource "aws_s3_bucket" "this" {
   bucket = "${var.bucket_name}-${data.aws_caller_identity.current.account_id}"
 
-  lifecycle {
-    prevent_destroy = true  
-  }
+  #lifecycle {
+  #  prevent_destroy = true  
+  #}
 }
 
 resource "aws_ssm_parameter" "s3_bucket_name" {
