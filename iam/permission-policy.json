@@ -33,7 +33,8 @@
       "Effect": "Allow",
       "Action": [
         "ssm:PutParameter",
-        "ssm:GetParameter"
+        "ssm:GetParameter",
+        "ssm:GetParameters"
       ],
       "Resource": "*"
     },
