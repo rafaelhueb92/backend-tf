@@ -26,11 +26,11 @@ aws iam create-open-id-connect-provider \
 
 fi
 
-ROLE_EXISTS=$(aws iam get-role --role-name "$ROLE_NAME" 2>&1)
+ROLE_EXISTS=$(aws iam get-role --role-name "$GITHUB_ACTION_ROLE_NAME" 2>&1)
 
 if [[ "$ROLE_EXISTS" == *"NoSuchEntity"* ]]; then
 
-echo "Creating the Trust Policy for the Github Repository $2 to deploy into the AWS account ID $1"
+echo "Creating the Trust Policy for the Github Repository $GITHUB_REPO to deploy into the AWS account ID $AWS_ACCOUNT_ID"
 
 sed -e "s/AWS_ACCOUNT_ID/$AWS_ACCOUNT_ID/g" -e "s|GITHUB_REPO|$GITHUB_REPO|g" trust-policy.json > trust-policy-temp.json
 
