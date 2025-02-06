@@ -34,7 +34,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
-          role-to-assume: $ARN
+          role-to-assume: $ROLE_ARN
           aws-region: us-east-1
       
       - name: Setup Terraform
