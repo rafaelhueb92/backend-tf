@@ -1,0 +1,44 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  ACTIONS_STEP_DEBUG: true
+  AWS_DEBUG: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsRole
+          aws-region: us-east-1
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.4.0
+
+      - name: Terraform Init Backend Bucket
+        run: terraform init
+        working-directory: ./terraform
+
+      - name: Terraform Apply Backend
+        run: terraform apply -auto-approve
+        working-directory: ./terraform
+
+      - name: Destroy Terraform resources if anything goes wrong
+        run: terraform destroy -auto-approve
+        working-directory: ./terraform
+        if: failure()  
