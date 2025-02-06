@@ -19,23 +19,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Get repository name as variable
-        id: set_repo_name
+      - name: Set environment variables
         run: |
-          REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-          echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
-          echo "Repository Name: $REPO_NAME"  
-      - name: Create IAM Role ARN with Repository Name
+          echo "REPO_NAME=${{ github.repository }}" >> $GITHUB_ENV
+          echo "ROLE_NAME=GitHubActionsRole" >> $GITHUB_ENV
+          echo "ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}" >> $GITHUB_ENV
+
+      - name: Concatenate environment variables to create IAM Role ARN
         run: |
-          ROLE_ARN="arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsRole-$REPO_NAME"
-          echo "ROLE_ARN=$ROLE_ARN" >> $GITHUB_ENV
-          echo "Role ARN: $ROLE_ARN"
+          ARN="arn:aws:iam::$ACCOUNT_ID:role/$ROLE_NAME-${REPO_NAME#*/}"
+          echo "The IAM Role ARN is: $ARN"
+          echo "ROLE_ARN=$ARN" >> $GITHUB_ENV
       
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
-          role-to-assume: $ROLE_ARN
-          aws-region: us-east-1
+          role-to-assume: ${{ env.ROLE_ARN }}
+          role-session-name: GitHubActionsSession
+          aws-region: us-east-1 
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
