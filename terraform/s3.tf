@@ -7,13 +7,13 @@ resource "aws_s3_bucket" "this" {
 }
 
 resource "aws_ssm_parameter" "s3_bucket_name" {
-  name  = "/${bucket_name}/name"
+  name  = "/${var.bucket_name}/name"
   type  = "String"
   value = aws_s3_bucket.this.id
 }
 
 resource "aws_ssm_parameter" "s3_bucket_arn" {
-  name  = "/${bucket_name}/arn"
+  name  = "/${var.bucket_name}/arn"
   type  = "String"
   value = aws_s3_bucket.this.arn
 }
