@@ -37,8 +37,8 @@ jobs:
           role-to-assume: ${{ env.ROLE_ARN }}
           aws-region: us-east-1 
       
-      - name: Verify AWS Identity
-        run: aws sts get-caller-identity
+      - name: Clear AWS Credentials Cache
+        run: rm -rf ~/.aws/cli/cache
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
